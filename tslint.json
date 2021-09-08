@@ -1,0 +1,11 @@
+{
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
+	"rules": {
+		"jsdoc-format": {
+			"severity": "off"
+		},
+		"no-empty": {
+			"severity": "off"
+		}
+	}
+}
