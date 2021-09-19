@@ -1,5 +1,6 @@
 import { BufferedChannel, Channel } from './channel';
 import { ReceiverChannel, SenderChannel } from './types';
+import { AsyncExecute, AwaitableExecute } from './impl/go-routine';
 
 export const make = <T>(buffer: number = 0): Channel<T> | BufferedChannel<T> => new BufferedChannel<T>(buffer);
 
@@ -16,3 +17,9 @@ export const len = <T>(chan: SenderChannel<T> | ReceiverChannel<T>): number => {
 
 export const receiver = <T>(chan: Channel<T>): ReceiverChannel<T> => chan;
 export const sender = <T>(chan: Channel<T>): SenderChannel<T> => chan;
+
+export const go = AsyncExecute;
+
+export const awaitExecute = async (job: Function) => {
+	await AwaitableExecute(job);
+};
