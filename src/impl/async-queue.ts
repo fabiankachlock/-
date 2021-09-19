@@ -1,11 +1,12 @@
-import { AsyncQueueReceive } from './types';
+import { ChannelReceiveType } from '../types';
 
 export class AsyncQueue<T> {
-	private isClosed = false;
+	public isClosed = false;
 
 	private queue: Array<T> = [];
 
 	private waitingPromise: Promise<{}> = new Promise(() => {});
+	private customWaitingPromise: Promise<{}> | undefined;
 
 	private resolveNext = () => {};
 
@@ -47,7 +48,19 @@ export class AsyncQueue<T> {
 		}
 	};
 
-	receive = async (): Promise<AsyncQueueReceive<T>> => {
+	pauseReceiver = (): (() => void) => {
+		let relieve = () => {};
+		this.customWaitingPromise = new Promise(
+			resolve =>
+				(relieve = () => {
+					resolve({});
+					this.customWaitingPromise = undefined;
+				})
+		);
+		return relieve;
+	};
+
+	receive = async (): Promise<ChannelReceiveType<T>> => {
 		if (this.isClosed && this.queue.length === 0) {
 			return {
 				value: undefined,
@@ -64,6 +77,9 @@ export class AsyncQueue<T> {
 
 		// await next change
 		await this.waitingPromise;
+		if (this.customWaitingPromise) {
+			await this.customWaitingPromise;
+		}
 		return this.receive();
 	};
 }
